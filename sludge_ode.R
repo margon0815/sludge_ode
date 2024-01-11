@@ -7,43 +7,46 @@ library(deSolve)
 # markus.ahnert@tu-dresden.de
 
 # define ODE function
-sludge_ode <- function(t, state, params) {
+growth_ode <- function(t, state, params) {
   with(as.list(c(state, params)), {
-    tlag <- t - 1
-    if (tlag < 0)
-      ylag <- state
-    else 
-      ylag <- lagvalue(tlag)  # returns a vector
+    
+    Q <- influentfun(t)
+    
+    # empir. Funktion für X_B aus A 131
+    tE   <- 0.5*A_NB*hs/(0.7*Q*R)                               # Eindickzeit ist mittlere Verweilzeit des Schlammes im Schlammbett des NKB
+    X_B  <- 1000/DSVI*(24*tE)^(1/3)                             # Bodenschlammkonz. im Nachklärbecken, Umrechnung von Einheit d zu h über 24 h/d
     
     # ODEs
-    dhs   <- Q*(1+R)*X_BB/(0.5*A_NB*X_B) - 0.7*Q*R/(0.5*A_NB)
-    dtE   <- 0.5*A_NB/(0.7*Q*R)*dhs
-    dX_BB <- 0.7*Q/V_BB*R*X_B - Q/V_BB*(1+R)*X_BB
+    dhs   <- Q*(1+R)*X_BB/(0.5*A_NB*X_B) - 0.7*Q*R/(0.5*A_NB)   # Schlammspiegelhöhe
+    dX_BB <- 0.7*Q/V_BB*R*X_B - Q/V_BB*(1+R)*X_BB               # Schlammkonz. im Belebungsbecken
     
-    # Variante 1: Nutzung des vorherigen Zeitschrittes
-    #dX_B  <- 1000/DSVI*(24*(tE+dtE))^(1/3) - 1000/DSVI*(24*ylag[4])^(1/3) # Umrechnung von Einheit d zu h über 24 h/d
-    
-    # Variante 2: Nutzung von X_B - das ist der state und der müsste ja auch dem vorherigen Zeitschritt entsprechen?
-    dX_B  <- 1000/DSVI*(24*(tE+dtE))^(1/3) - X_B # Umrechnung von Einheit d zu h über 24 h/d
-    
-    # offensichtlich sind beide Varianten falsch, da sich jeweils kein statischer Zustand 
-    # einstellt und das Ergebnis unplausibel ist
-    
+    # Hilfsberechnungen
+    Ms <- 0.5*A_NB*hs*X_B + V_BB*X_BB                           # Schlamm im System = Schlamm im NKB + BB 
+    MsNKB <- 0.5*A_NB*hs*X_B
+    MsBB <- V_BB*X_BB
+
     # return derivatives
-    return(list(c(dhs,dtE,dX_BB,dX_B)))
+    return(list(c(dhs,dX_BB),Q=Q, X_B=X_B,X_R=0.7*X_B, Ms=Ms,MsBB=MsBB,MsNKB=MsNKB))
   })
 }
 
 # set up parameters in a list
-params = c(Q = 200, R=1, V_BB=100, A_NB=50, DSVI=100 )
+params = c(Q = 1000, R=1, V_BB=1000, A_NB=250, DSVI=100 )
 
-state_0 = c(hs=0, tE=0, X_BB=3000, X_B=5000) # initial state
+state_0 = c(hs=0.1, X_BB=3) # initial state
 
 t_start = 0 # start time
-t_end = 10 # end time
+t_end = 5 # end time
 t_points = seq(t_start, t_end, by = 0.01) # time points for solution
 
-# solve ODE
-out <- dede(y = state_0, times = t_points, func = sludge_ode, parms = params)
+# dynamischer Zulauf soll für Schlammverlagerung vom BB in NKB sorgen
+
+fQ <- 2
+
+influentdata <- data.frame(time = c(0, 1, 2, 100) ,
+                           value = c(params["Q"], fQ*params["Q"], params["Q"], params["Q"]))
+influentfun <- approxfun(influentdata, method="constant")
+
+out <- ode(y = state_0, times = t_points, func = growth_ode, parms = params)
 
 plot(out)
