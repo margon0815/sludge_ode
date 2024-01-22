@@ -19,9 +19,9 @@ sludge_ode <- function(t, state, params,influentfcn) {
     # sludge mass in AS reactor
     MsBB <- V_BB*X_BB
     # total sludge mass as control variable
-    Ms <- MsBB+Ms_NKB                           # sludge mass in system = SC+ AS 
+    Ms <- MsBB+Ms_NKB                           
     
     # return derivatives and additional results
-    return(list(c(dX_BB,dMs_NKB),Ms_BB=MsBB,X_R=X_R,hs=hs, Sum_Ms=Ms))
+    return(list(c(dX_BB,dMs_NKB),Ms_BB=MsBB,X_R=X_R,hs=hs,Qin=Q))
   })
 }

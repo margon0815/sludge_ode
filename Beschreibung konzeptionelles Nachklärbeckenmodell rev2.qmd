@@ -1,0 +1,165 @@
+---
+title: "Entwicklung und Anwendung eines konzeptionellen Nachklärbecken-Modells für Ausbildungszwecke"
+author: "Markus Ahnert, Technische Universität Dresden"
+email: "markus.ahnert@tu-dresden.de"
+format: pdf
+bibliography: quellen.bib
+csl: uni_bremen_deutsch2.csl # https://editor.citationstyles.org/visualEditor/
+---
+## Modellgrundlagen
+
+Nachklärbecken (NKB) als letzte verfahrenstechnische Stufe einer Kläranlage haben zwei wesentliche Funktionen:
+
+1. Abtrennen des Belebtschlamms vom gereinigten Abwasser
+2. Aufkonzentrieren des Rücklaufschlammes für die Rückfühung in das Belebungsbecken (BB)
+
+Dabei wirkt das Schlammbett im Nachklärbecken als Speicher für einen Teil des Belebtschlamms. Je mehr Schlamm im NKB gespeichert ist, umso weniger steht im BB für die Reinigungsprozesse zur Verfügung. aher ist die Kenntnis über die Prozesse und deren Dynamik, die sich im System BB - NKB einstellt, von wesentlicher Bedeutung.
+Die folgende Modellbeschreibung wurde basierend auf den Arbeiten von [@krebs2000] und [@holzer1998] für eine Verwendung mit der Programmiersprache [R](https://www.R-project.org/) adaptiert (siehe auch [@RManual]). In der Arbeit von [@hupfer2001] erfolgte ein Praxistest des beschriebenen Modells im Vergleich zu anderen Nachklärbeckenmodellen mit realen Messdaten. Die generelle Eignung wurde dabei nachgewiesen. Eine Anwendung zur Nachbildung realer Prozesse erscheint aber zweitrangig. Aufgrund der Einfachheit des nachfolgend beschriebenen Modellansatzes ist er sehr gut geeignet, sowohl die Prozessdynamik als auch die Technik der Modellierung für Ausbildungszwecke zu demonstrieren.
+  
+![Systemdefinition](systemdefinition.png){#fig-system}
+       
+Das betrachtete Gesamtsystem ist in [@fig-system] dargestellt. Es besteht aus dem gekoppelten System Belebungsbecken - Nachklärbecken. Für das nachfolgend beschrieben Modell wird zur Vereinfachung angenommen, dass die folgenden Stoffströme im Gleichgewicht stehen und sich somit gegenseitig aufheben:
+
+-   Feststoffe im Zulauf
+-   Biomassewachstum im Belebungsbecken
+-   Abzug von Überschussschlamm
+-   Feststoffe im Ablauf im gereinigten Abwasser
+  
+Für die Eindickung im Schlammbett des Nachklärbeckens wird angenommen, dass dies annähernd einer linearen Konzentrationszunahme über die Schlammbetttiefe entspricht (siehe [@fig-konzept]).  
+
+![Feststoffgehalt über die Schlammbetttiefe](konzept_schlammspiegel.png){#fig-konzept}
+  
+  
+## Aufstellen der Gleichungen
+
+Im einfachsten Fall kann das NKB als ein System mit einem Schlammbett und einem Klarwasserüberstand definiert werden. Der Schlamm im NKB konzentriert sich dabei mit zunehmender Tiefe im Schlammbett auf. Die am Beckenboden erreichbare Feststoffkonzentration X~B~ kann dabei nach [@eq-1] berechnet werden ([@A131_2016] Gl. 40):
+
+$$
+X_B = \frac{1000}{DSVI} \cdot \sqrt[3]{24 \cdot t_E} = \frac{1000 \cdot \sqrt[3]{24}}{DSVI} \cdot \sqrt[3]{t_E}
+$${#eq-1}
+
+mit t~E~ Eindickzeit [d] und DSVI Verdünnungsschlammvolumenindex [mL/kg].  
+Die Feststoffkonzentration im Rücklaufschlamm X~R~ wird daraus abgemindert berechnet durch den Einfluss von Kurzschlussströmungen (siehe dazu [@A131_2016] S. 41):
+
+$$
+X_R = 0.7 \cdot X_B \text{ , } X_B = \frac{X_R}{0.7}
+$${#eq-2}
+
+Die Eindickzeit t~E~ wird angenommen als mittlere Schlammverweilzeit im Schlammbett des Nachklärbeckens:
+
+$$
+t_E = \frac{\textit{Schlammmasse im NKB}}{\textit{Schlammmasse aus NKB zurück in BB}} = \frac{M_{S,NKB}}{Q \cdot R \cdot X_R} = \frac{M_{S,NKB}}{0.7 \cdot Q \cdot R \cdot X_B}
+$${#eq-3}
+
+mit Q Zuflussvolumenstrom [m³/d]   
+und R Rücklaufverhältnis vom NKB in das BB ($R=\frac{Q_{RS}}{Q}$) [-].
+
+[@eq-1] kann vereinfacht werden durch Abtrennung der Konstanten:
+
+
+$$
+X_B = K \cdot \sqrt[3]{t_E} \text{   mit   }   K = \frac{1000 \cdot \sqrt[3]{24}}{DSVI}
+$${#eq-4}
+
+Die Eindickzeit t~E~ errechnet sich damit zu:
+
+$$
+t_E = X_B^3 \cdot \left(\frac{1}{K}\right)^3
+$${#eq-5}
+
+Durch Gleichsetzen von [@eq-3] und [@eq-5] kann nun durch Umformen X~B~ berechnet werden:
+
+$$
+X_B^3 \cdot \left(\frac{1}{K}\right)^3 = \frac{M_{S,NKB}}{0.7 \cdot Q \cdot R \cdot X_B}
+$${#eq-6}
+
+$$
+X_B^4 = \frac{M_{S,NKB}}{\left(\frac{1}{K}\right)^3 \cdot 0.7 \cdot Q \cdot R}
+$${#eq-7}
+
+$$
+X_B = \sqrt[4]{\left(\frac{M_{S,NKB}}{\left(\frac{1}{K}\right)^3 \cdot 0.7 \cdot Q \cdot R}\right)}
+$${#eq-8}
+
+Unter Verwendung von [@eq-2] ergibt sich aus [@eq-8] die Rücklaufschlammkonzentration X~R~:
+
+$$
+X_R = 0.7 \cdot \sqrt[4]{\left(\frac{M_{S,NKB}}{\left(\frac{1}{K}\right)^3 \cdot 0.7 \cdot Q \cdot R}\right)}
+$${#eq-9}
+
+Nun können die Bilanzgleichungen für die Änderungen der Schlammmasse im Belebungsbecken und im Nachklärbecken aufgestellt werden. Für das Belebungsbecken ergibt sich:
+
+$$
+V_{BB} \cdot \frac{dX_{BB}}{dt} = Q \cdot R \cdot X_R - Q \cdot (1+R) \cdot X_{BB}
+$${#eq-10}
+
+Unter der Annahme eines konstanten Belebungsbeckenvolumens V~BB~ lässt sich dies umformen zu:
+
+$$
+\frac{dX_{BB}}{dt} = \frac{Q}{V_{BB}} \cdot \left(R \cdot X_R - (1+R) \cdot X_{BB}\right)
+$${#eq-11}
+
+Die Schlammmassenänderung im Schlammbett des Nachklärbeckens ergibt sich zu:
+
+$$
+\frac{dX_{M_{S,NKB}}}{dt} = Q \cdot \left(1+R \right) \cdot X_B - Q \cdot R \cdot X_R
+$${#eq-12}
+
+Abschließend kann mit den bekannten Größen die Schlammspiegelhöhe h~s~ berechnet werden:
+
+$$
+h_S = 0.7 \cdot \frac{M_{S,NKB}}{0.5 \cdot A_{NKB} \cdot X_R}
+$${#eq-13}
+
+Damit stehen alle Beziehungen zur Verfügung, um die notwendigen Größen zu berechnen.
+  
+  
+## Funktion für das Differentialgleichungssystem
+
+Die technische Umsetzung wird mit der Programmiersprache R demonstriert. Dabei kann das Gleichungssystem in einer Funktion gekapselt werden:
+
+```r
+sludge_ode <- function(t, state, params,influentfcn) {
+  with(as.list(c(state, params)), {
+    
+    Q <- influentfcn(t)       # function for dynamic influent
+    K <- (1000*24^(1/3))/DSVI # constant K 
+    
+    # solids conc. of return sludge flow
+    X_R <-0.7*(Ms_NKB/((1/K)^3*0.7*Q*R))^(1/4) 
+    
+    # ODEs
+    
+    # sludge conc. in activated sludge reactor 
+    # (direct calculation of conc. with constant volume of AS reactor)
+    dX_BB <- Q/V_BB*R*X_R - Q/V_BB*(1+R)*X_BB 
+    
+    # sludge mass in secondary clarifier 
+    # (variable volume of sludge bed as reactor volume)
+    dMs_NKB <- Q*(1+R)*X_BB-Q*R*X_R             
+    
+    # additional calculations
+    
+    # height of sludge bed
+    hs <- 0.7*Ms_NKB/(0.5*A_NKB*X_R)
+    
+    # sludge mass in AS reactor
+    MsBB <- V_BB*X_BB
+    
+    # total sludge mass as control variable
+    Ms <- MsBB+Ms_NKB                           
+    
+    # return derivatives and additional results
+    return(list(c(dX_BB,dMs_NKB),Ms_BB=MsBB,X_R=X_R,hs=hs,Qin=Q))
+  })
+}
+```
+  
+Für die Lösung dieses Gleichungssystem wird die Verwendung des R-Paketes deSolve empfohlen ([@Soetaert2010-JSS-deSolve]). Dazu müssen die Modellparameter definiert und ein Startzustand festgelegt werden.  
+Beispielanwendungen mit diesem Gleichungssystem finden sich in einem GitHub Repository: [https://github.com/margon0815/sludge_ode](https://github.com/margon0815/sludge_ode).  
+  
+
+## Quellenverzeichnis
+
+::: {#refs}
+:::
