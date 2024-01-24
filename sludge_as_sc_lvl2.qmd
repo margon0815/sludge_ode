@@ -10,6 +10,7 @@ library("jpeg")
 library("deSolve")
 library("Ecfun")
 
+linebreaks <- function(n){HTML(strrep(br(), n))}
 
 # conceptual model for dynamic system of activated sludge reactor and secondary 
 # clarifier with variable sludge height based on Krebs et al., 2000
@@ -29,6 +30,11 @@ t_points <- seq(t_start, t_end, by = 0.01) # time points for solution
 # ode function
 source("func_sludge_ode.R")
 
+# general preferences for the plot
+std_ftsize <- 1.5 # standard font size
+std_lwd <- 2 # standard line width
+
+
 
 ```
 
@@ -36,16 +42,20 @@ source("func_sludge_ode.R")
 Markus Ahnert, Technische Universität Dresden, Institut für Siedlungs- und Industriewasserwirtschaft\
 [markus.ahnert\@tu-dresden.de](mailto:markus.ahnert@tu-dresden.de)
 
-###  Erläuterungen
+### Einführung
 
-Die nachfolgenden Erläuterungen bauen auf dem [statischen Schlammhaushalt in einer Kläranlage ](https://swwdigit.de/bb_nkb1/) auf. Dabei werden die gleichen Vereinfachungen hinsichtlich des gegenseitigen Aufhebens von 
+Die nachfolgenden Erläuterungen bauen auf dem [statischen Schlammhaushalt in einer Kläranlage ](https://swwdigit.de/bb_nkb1/) auf. Während in diesem Modell der Gleichgewichtszustand durch Auswahl verschiedener Randbedingungen betrachtet werden konnte, erweitert sich die Aussage des Modells in der vorliegenden Anwendung um den Einfluss der wesentlichen dynamischen Randbedingung - der Zulaufmenge im Wechsel zwischen Trockenwetter und Niederschlagsereignissen.
+
+
+### Erläuterungen
+Es werden die gleichen Vereinfachungen hinsichtlich des gegenseitigen Aufhebens von 
 
 -   Feststoffen im Zulauf
 -   Biomassewachstum im Belebungsbecken
 -   Abzug von Überschussschlamm und
 -   Feststoffen im Ablauf im gereinigten Abwasser
 
-angenommen. Daraus ergeben sich die Stoffströme wie in nachfolgender Abbildung.
+wie im statischen Modellansatz angenommen. Daraus ergeben sich die Stoffströme wie in nachfolgender Abbildung.
   
 
 ```{r image_complete}
@@ -53,23 +63,25 @@ plotOutput("wwtp_complete")
 ```
   
   
-Zusätzlich wird hier nun eine dynamische Zuflusserhöhung eingeführt. Die Zulaufmenge Q kann mit einem Faktor fQ erhöht werden. Dies erfolgt für 24 Stunden zwischen Tag 2 und 3 des 5tägigen Simulationszeitraums. Die Zuflusserhöhung sorgt für eine Schlammverlagerung zwischen Belebungs- und Nachklärbecken, die je nach eingestellten Parametern und Betriebsbedingungen unterschiedlich stark ausfällt. Nach Rückkehr zur Ausgangszulaufmenge dauert es je nach Einstellungen wieder einige Zeit, bis sich wieder die Werte auf einen statischen Zustand eingestellt haben.
+Zusätzlich wird hier nun eine dynamische Zuflusserhöhung eingeführt, wie sie z.B. bei einem Niederschlagsereignis auftritt, wenn plötzlich eine größere Wassermenge zufließt. Die Zulaufmenge Q kann mit einem Faktor fQ erhöht werden. Dies erfolgt idealisiert für 24 Stunden zwischen Tag 2 und 3 des 5tägigen Simulationszeitraums. Die Zuflusserhöhung sorgt für eine Schlammverlagerung vom Belebungs- in das Nachklärbecken, die je nach eingestellten Parametern und Betriebsbedingungen unterschiedlich stark ausfällt. Nach Rückkehr zur Ausgangszulaufmenge dauert es je nach Einstellungen wieder einige Zeit, bis sich wieder die Werte auf einen statischen Zustand eingestellt haben.
 Diese Schlammverlagerung ist besonders für die Prozesse der Nitrifikation interessant. Im Niederschlagsfall wird aus dem Kanalnetz eine vglw. große Sticktofffracht am Ereignisbeginn in die Kläranlage verlagert. Durch die gleichzeitige Verlagerung von Schlamm und der darin enthaltenen Biomasse kann sich so eine Situation einstellen, bei der es zu einer sprunghaften Erhöhung der Ablaufkonzentration an Ammonium kommt und somit die Gefahr einer Überschreitung des Überwachungswertes besteht. Daher ist die Schlammverlagerung in der Kläranlage möglichst gering zu halten, wobei eine direkte Beeinflussung durch den Kläranlagenbetrieb kaum möglich ist.
 Gleichzeitig wird bei der Auslegung des Gesamtsystems aus Kanalnetz und Kläranlage angestrebt, einen möglichst großen Teil des anfallenden Niederschlagswassers in der Kläranlage mit zu behandeln, um die Gewässerbelastung über Mischwassereinleitungen zu minimieren.
   
   
   
-### Übungsbeispiel
+### Beispielberechnungen
 
-Im nachfolgenden Beispiel wird für das Belebungsbecken ein Volumen von 1000 m³ in der Berechnung angesetzt, für das Nachklärbecken eine Oberfläche von 150 m². Zusätzlich zu den Betriebseinstellungen aus der Berechnung des [statischen Schlammhaushalts in einer Kläranlage ](https://swwdigit.de/bb_nkb1/) kann die Zulaufmenge Q über den Faktor fQ erhöht werden.
+Im nachfolgenden Beispiel wird für das Belebungsbecken wieder ein Volumen von 1000 m³ in der Berechnung angesetzt, für das Nachklärbecken eine Oberfläche von 150 m². Zusätzlich zu den Betriebseinstellungen aus der Berechnung des [statischen Schlammhaushalts in einer Kläranlage ](https://swwdigit.de/bb_nkb1/) kann die Zulaufmenge Q über den Faktor fQ erhöht werden. Üblicherweise liegt dieser Faktor in einer Größenordnung von 2-4 für Kläranlagen, die an einem Kanalnetz im Mischsystem angeschlossen sind. Je größer der Faktor gewählt wird, umso stärker sind die Auswirkungen der dynamischen Änderung auf den Schlammhaushalt der Kläranlage.
+  
+  
+### Aufgaben
 
-#### Aufgaben
-
-- Wie verändert sich qualitativ die Schlammspiegelhöhe im Nachklärbecken?
-- Welcher Parameter hat den größten Einfluss auf die Schlammspiegelhöhe?
-- Welcher Anteil an Belebschlamm befindet sich im steady state vor Zulauferhöhung bzw. nach Rückkehr zum Normaldurchfluss im Belebungsbecken und welcher befindet sich im Schlammbett des Nachklärbeckens?
-- Wie lange dauert es bei den voreingestellten Parametern ungefähr, bis sich nach Zuflusserhöhung ein neues Gleichgewicht eingestellt hat?
-- Wie ändert sich diese Einschwingzeit, wenn der ISV höher wird? Wie kann das erklärt werden?
+1. Wie verändert sich qualitativ die Schlammspiegelhöhe im Nachklärbecken bei Änderung der einzelnen Parameter?
+2. Welcher Parameter hat den größten Einfluss auf die Schlammspiegelhöhe?
+3. Welcher Anteil an Belebschlamm befindet sich im Gleichgewichtszustand vor Zulauferhöhung bzw. nach Rückkehr zum Trockenwetterzulauf im Belebungsbecken und welcher befindet sich im Schlammbett des Nachklärbeckens? Wie ändern sich diese Anteile während des Niederschlagsereignisses?
+4. Welchen Einfluss hat eine Erhöhung des ISV auf die Verteilung der Schlammmassen?
+5. Wie lange dauert es bei den voreingestellten Parametern ungefähr, bis sich nach Zuflusserhöhung ein neues Gleichgewicht eingestellt hat?
+6. Wie ändert sich diese Einschwingzeit, wenn der ISV höher wird? Wie kann das erklärt werden?
 
   
   
@@ -77,7 +89,9 @@ Im nachfolgenden Beispiel wird für das Belebungsbecken ein Volumen von 1000 m³
 ```{r}
 
 fluidPage(
-fluidRow(
+fluidRow(style='border-left: 1px solid black;
+                border-right: 1px solid black;
+                border-top: 1px solid black',
   column(width=6,
   # slider ----
   sliderInput("Q", "Zulaufmenge Q [m³/d]:",
@@ -89,7 +103,8 @@ fluidRow(
                   min = 1, max = 10,
                   value = 2, step = 0.5))
   ),
-fluidRow(
+fluidRow(style='border-left: 1px solid black;
+                border-right: 1px solid black',
   column(width=6,
   # slider ----
   sliderInput("RV", "Rücklaufverhältnis RV [-]:",
@@ -101,13 +116,15 @@ fluidRow(
                   min = 1, max = 5,
                   value = 3, step = 0.1))
   ),
-fluidRow(
+fluidRow(style='border-left: 1px solid black;
+                border-right: 1px solid black;
+                border-bottom: 1px solid black',
   column(width=6,
   # slider ----
   sliderInput("ISV", "Schlammvolumenindex ISV [mL/kg]:",
                   min = 50, max = 200,
                   value = 100, step = 5))
-  )
+  ),linebreaks(1)
 )
 
 ```
@@ -194,12 +211,7 @@ output$wwtp_simple1 <- renderPlot({
   QX_BB <- Qin*(1+input$RV)*X_BB
   QX_R <- Qin*input$RV*X_R
 
-# general preferences for the plot
-par(mfrow = c(2, 2),
-          mar = c(4,4,2,2)+0.1)    
-
-std_ftsize <- 1.5 # standard font size
-std_lwd <- 2 # standard line width
+ par(mfrow = c(2, 2),mar = c(4,4,2,2)+0.1)    
 
 # plot sludge height
 plot(x=time,y=hs,type="l",lwd=std_lwd,
@@ -213,38 +225,56 @@ plot(time, MsBB, type = "n", xlim = c(0, 5), ylim = c(min(QX_BB,QX_R), max(QX_BB
 
 # Plot each line one by one
 lines(time, QX_BB, type = "l", col = "black",lwd=std_lwd)
-lines(time, QX_R, type = "l", col = "firebrick",lty=2,lwd=std_lwd)
+lines(time, QX_R, type = "l", col = "dodgerblue4",lty=2,lwd=std_lwd)
 # Add a legend
 legend("right", legend = c("ins NKB", "ins BB"), 
-       col = c("black", "firebrick"), lty = c(1,2), inset=0.01,cex=std_ftsize)
+       col = c("black", "dodgerblue4"), lty = c(1,2), inset=0.01,cex=std_ftsize,lwd=std_lwd)
 
   
 # plot solids conc
-plot(time, X_BB, type = "n", xlim = c(0, 5), ylim = c(min(X_BB), max(X_R)),
-     xlab = "Zeit [d]", ylab = "TS-Konzentration [g/L]", main = "Feststoffgehalte",
+plot(time, X_BB, type = "l", xlim = c(0, 5), ylim = c(min(X_BB), max(X_BB)), 
+     col = "black",lwd=std_lwd,
+     xlab = "Zeit [d]", ylab = "TS-Gehalt [g/L]", main = "Feststoffgehalte",
      cex.main=std_ftsize,cex.sub=std_ftsize,cex.lab=std_ftsize,cex.axis=std_ftsize) 
 
-# Plot each line one by one
-lines(time, X_BB, type = "l", col = "black",lwd=std_lwd)
-lines(time, X_R, type = "l", col = "firebrick",lty=2,lwd=std_lwd)
+# set parameter new=True for a new axis 
+par(new = TRUE)
+
+plot(time, X_R, type = "l", xlim = c(0, 5), ylim = c(min(X_R), max(X_R)), 
+     col = "dodgerblue4",lty=2,lwd=std_lwd, axes = FALSE,
+     xlab = "", ylab = "",
+     cex.main=std_ftsize,cex.sub=std_ftsize,cex.lab=std_ftsize,cex.axis=std_ftsize) 
+
+axis(side = 4, at = pretty(range(X_R)),cex.axis=std_ftsize,
+     col = 'dodgerblue4', col.axis = 'dodgerblue4', col.ticks = 'dodgerblue4')       
+
 # Add a legend
-legend("right", legend = c("BB", "RLS"), 
-       col = c("black", "firebrick"), lty = c(1,2), inset=0.01,cex=std_ftsize, ncol=2)
+legend("bottomright", legend = c("BB", "RLS"), 
+       col = c("black", "dodgerblue4"), lty = c(1,2), inset=c(0.01,0.01),cex=std_ftsize,lwd=std_lwd)
 
 
 # plot mass content
-plot(time, MsBB, type = "n", xlim = c(0, 5), ylim = c(min(MsBB,MsNKB), max(MsBB,MsNKB)),
+plot(time, MsBB, type = "l", xlim = c(0, 5), ylim = c(min(MsBB,MsBB), max(MsBB,MsBB)),
      xlab = "Zeit [d]", ylab = "Feststoffmasse [kg]", main = "gespeicherte Massen",
+     cex.main=std_ftsize,cex.sub=std_ftsize,cex.lab=std_ftsize,cex.axis=std_ftsize,
+     col = "black",lwd=std_lwd) 
+
+# set parameter new=True for a new axis 
+par(new = TRUE)
+
+plot(time, MsNKB, type = "l", xlim = c(0, 5), ylim = c(min(MsNKB), max(MsNKB)), 
+     col = "dodgerblue4",lty=2,lwd=std_lwd, axes = FALSE,
+     xlab = "", ylab = "",
      cex.main=std_ftsize,cex.sub=std_ftsize,cex.lab=std_ftsize,cex.axis=std_ftsize) 
-   
-# Plot each line one by one
-lines(time, MsBB, type = "l", col = "black",lwd=std_lwd)
-lines(time, MsNKB, type = "l", col = "firebrick",lty=2,lwd=std_lwd)
+
+axis(side = 4, at = pretty(range(MsNKB)),cex.axis=std_ftsize,
+     col = 'dodgerblue4', col.axis = 'dodgerblue4', col.ticks = 'dodgerblue4')       
+
 # Add a legend
 legend("right", legend = c("BB", "NKB"), 
-       col = c("black", "firebrick"), lty = c(1,2), inset=0.01,cex=std_ftsize)
+       col = c("black", "dodgerblue4"), lty = c(1,2), inset=0.01,cex=std_ftsize,lwd=std_lwd)
 
-# box(lwd=1) works only for single image
+box(col = "black",which = "outer",lwd=1)
 
 })
 ```
