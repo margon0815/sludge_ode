@@ -42,6 +42,8 @@ std_lwd <- 2 # standard line width
 Markus Ahnert, Technische Universität Dresden, Institut für Siedlungs- und Industriewasserwirtschaft\
 [markus.ahnert\@tu-dresden.de](mailto:markus.ahnert@tu-dresden.de)
 
+Der Source-Code der Anwendung kann unter diesem [Link](https://github.com/margon0815/sludge_ode) auch heruntergeladen werden. Eine Erläuterung des zugrundeliegenden Modells findet sich in [diesem Dokument](https://github.com/margon0815/sludge_ode/blob/main/Beschreibung-konzeptionelles-Nachkl%C3%A4rbeckenmodell-rev2.pdf). 
+
 ### Einführung
 
 Die nachfolgenden Erläuterungen bauen auf dem [statischen Schlammhaushalt in einer Kläranlage ](https://swwdigit.de/bb_nkb1/) auf. Während in diesem Modell der Gleichgewichtszustand durch Auswahl verschiedener Randbedingungen betrachtet werden konnte, erweitert sich die Aussage des Modells in der vorliegenden Anwendung um den Einfluss der wesentlichen dynamischen Randbedingung - der Zulaufmenge im Wechsel zwischen Trockenwetter und Niederschlagsereignissen.
@@ -100,7 +102,7 @@ fluidRow(style='border-left: 1px solid black;
   column(width=6,
   # slider ----
   sliderInput("fQ", "Zulauferhöhung fQ [-]:",
-                  min = 1, max = 10,
+                  min = 1, max = 6,
                   value = 2, step = 0.5))
   ),
 fluidRow(style='border-left: 1px solid black;
@@ -113,7 +115,7 @@ fluidRow(style='border-left: 1px solid black;
   column(width=6,
   # slider ----
   sliderInput("XBB", "TS-Gehalt Belebungsbecken TS_BB [g/L]:",
-                  min = 1, max = 5,
+                  min = 2, max = 5,
                   value = 3, step = 0.1))
   ),
 fluidRow(style='border-left: 1px solid black;
@@ -278,4 +280,5 @@ box(col = "black",which = "outer",lwd=1)
 
 })
 ```
+  
   

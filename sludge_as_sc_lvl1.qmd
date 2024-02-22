@@ -34,6 +34,9 @@ source("func_sludge_ode.R")
 
 Markus Ahnert, Technische Universität Dresden, Institut für Siedlungs- und Industriewasserwirtschaft\
 [markus.ahnert\@tu-dresden.de](mailto:markus.ahnert@tu-dresden.de)
+  
+Der Source-Code der Anwendung kann unter diesem [Link](https://github.com/margon0815/sludge_ode) auch heruntergeladen werden. Eine Erläuterung des zugrundeliegenden Modells findet sich in [diesem Dokument](https://github.com/margon0815/sludge_ode/blob/main/Beschreibung-konzeptionelles-Nachkl%C3%A4rbeckenmodell-rev2.pdf). 
+  
 
 ### Einführende Erläuterungen
 *Allgemeines*  
