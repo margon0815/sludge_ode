@@ -1,0 +1,231 @@
+---
+server: shiny
+title: "Static sludge inventory of a WWTP"
+author: "Markus Ahnert, markus.ahnert@tu-dresden.de"
+---
+
+```{r setup, include=FALSE}
+library("shiny")
+library("knitr")
+library("jpeg")
+library("deSolve")
+library("Ecfun")
+
+linebreaks <- function(n){HTML(strrep(br(), n))}
+
+# conceptual model for dynamic system of activated sludge reactor and secondary 
+# clarifier with variable sludge height based on Krebs et al., 2000
+
+# Markus Ahnert, Dresden University of Technology, Institute for Urban Water Management
+# markus.ahnert@tu-dresden.de
+
+image_complete <- readJPEG("www/as_sc_scheme_complete2_en.jpg") ## load at start saves time
+image_simple1 <- readJPEG("www/scheme_as_sc_simple1_en.jpg") 
+
+t_start <- 0 # start time
+t_end <- 5 # end time
+t_points <- seq(t_start, t_end, by = 0.5) # time points for solution
+
+# ode function
+source("func_sludge_ode.R")
+
+
+```
+
+The source code for the application can also be downloaded from this [link](https://github.com/margon0815/sludge_ode). An explanation of the underlying model can be found in [this document](https://github.com/margon0815/sludge_ode/blob/main/descr_model_secondary_clarifier_for_educational_purposes.pdf).
+
+### Introductory explanations
+
+*General information*\
+A wastewater treatment plant consists of several treatment stages. The mechanical treatment stage is followed by the biological treatment stage, usually in the form of the [activated sludge process](https://en.wikipedia.org/wiki/Activated_sludge). This is the most commonly used process for the biological treatment of municipal wastewater. The process is based on bacteria that use wastewater constituents for their growth and thus contribute to the degradation of these substances. To ensure a sufficient generation time, the biomass, i.e., the sum of all microorganisms involved (bacteria, protozoa, higher organism), must be enriched in a wastewater treatment plant.
+
+*Process engineering implementation in sewage treatment plants*\
+For this purpose, wastewater treatment plants have aeration tanks and secondary clarifiers.\
+The biological conversion reaction takes place in the aeration tank, while the separation of treated wastewater and activated sludge takes place in the secondary clarifier. The latter is returned to the aeration tank via the return sludge. Part of the activated sludge is removed from the wastewater treatment plant as excess sludge and further processed in the sludge treatment system. New activated sludge is produced in the aeration tank through biological degradation.
+
+*Internal and external influences on the sludge balance*\
+Various factors have a direct influence on the sludge balance in a wastewater treatment plant:
+
+-  Temporal fluctuations from the wastewater treatment plant inflow,
+-  Operating settings within the wastewater treatment plant, and
+-  Fluctuating settling properties of the activated sludge
+
+The interaction and temporal changes can lead to different equilibria in the sludge balance between the aeration tank and the secondary clarifier. When operating the wastewater treatment plant, care must be taken to ensure that no unfavorable conditions arise that could jeopardize the cleaning performance of the plant. The goal should always be to keep as much activated sludge as possible in the aeration tank.
+
+```{r image_complete}
+plotOutput("wwtp_complete")
+```
+
+### Analysis of influencing factors
+
+The figure above shows the main material flows from the influent of the aeration tank to the influent of the secondary clarifier, including the effluent. Return sludge and excess sludge flows are also shown. The sludge balance is influenced by the following material flows:
+
+- Solids in the influent
+- Biomass growth in the aeration tank
+- Removal of excess (waste activated) sludge
+- Solids in the effluent in the treated wastewater
+
+For the sake of simplicity, the calculation model used below assumes that all these material flows are in equilibrium and thus cancel each other out. Therefore, the settings only influence the distribution of sludge between the aeration tank and the secondary clarifier, as well as the thickening capacity and the resulting sludge level in the secondary clarifier. The following calculation results in the static state of the system. In a more advanced version, the [dynamic reaction of the sludge balance](https://swwdigit.de/bb_nkb2_en/) can also be considered.
+
+### Sample calculations
+
+*Scenario description* The following example refers to the sludge cycle between the aeration tank and the secondary clarifier. A volume of 1000 m³ was used in the calculation for the aeration tank and a surface area of 150 m² for the secondary clarifier. The concentration of the return sludge depends on the thickening of the sludge in the secondary clarifier. The longer the sludge remains in the secondary clarifier, the more concentrated it becomes. The following operating settings and sludge properties can be changed using the sliders:
+
+*Inflow quantity Q*\
+The greater the inflow quantity, the more sludge is transferred to the secondary clarifier. At the same time, this influences the retention time of the sludge in the secondary clarifier.
+
+*Return ratio RV* The return ratio is calculated as follows: RV = Q~RLS~/Q and indicates the proportion of the inflow volume that is in the sludge circuit. This variable also influences the retention time of the sludge in the secondary clarifier. The return ratio is determined during the design of the plant and is between 0.75 and 1.0.
+
+*Solids content in the aeration tank TS~AS~*\
+The solids content in the aeration tank is determined by the solids in the influent, the sludge production, and the set sludge age (via the excess sludge removal). If the solids content is very high and the sludge properties are unfavorable (see ISV), the capacity of the secondary clarifier may be exceeded. The sludge level then rises to such an extent that activated sludge is discharged into the effluent and thus into the water body.
+
+*Sludge volume index ISV*\
+The sludge volume index describes the thickening capacity of the sludge. The lower this value, the better. Typical values for easily settleable sludge are 80 - 120 mL/g. Sludge with a value of 150 mL/g or higher is considered difficult to settle.
+
+### Tasks
+
+1.  Get an impression of the effect and interdependencies of the individual setting parameters:
+
+-  What influence does the inflow quantity Q have on the sludge level h~s~? How can this be explained?
+-  How does the return sludge quantity Q~RLS~ change when the return ratio RV is reduced? Does this also change the solids content in the return sludge TS~RLS~? If so, why is this?
+-  Which variables are affected by a change in the sludge volume index ISV?
+
+2.  The secondary clarifier has a depth of 4 m. Find settings for TS~AS~ and ISV that are likely to result in sludge discharge.
+3. What is the minimum sludge level for the following settings: Q = 1000 m³/d / RV = 0.75 / TS~AS~ = 3.5 g/L (how should the ISV parameter be selected in this case?)
+
+<br>
+
+```{r}
+
+fluidPage(
+fluidRow(style='border-left: 1px solid black;
+                border-right: 1px solid black;
+                border-top: 1px solid black',
+  column(width=6,
+  # slider ----
+  sliderInput("Q", "influent flow rate Q [m³/d]:",
+                  min = 100, max = 20000,
+                  value = 1000, step = 100,
+                  animate =animationOptions(interval = 300, loop=TRUE))         
+         ),
+  column(width=6,
+  # slider ----
+  sliderInput("RV", "return flow ratio RV [-]:",
+                  min = 0.5, max = 1,
+                  value = 1, step = 0.05,
+                  animate =animationOptions(interval = 300, loop=TRUE))              
+         )
+  ),
+fluidRow(style='border-left: 1px solid black;
+                border-right: 1px solid black;
+                border-bottom: 1px solid black',
+  column(width=6,
+  # slider ----
+  sliderInput("XBB", HTML("Solids conc. AS TS<sub>AS</sub> [g/L]:"),
+                  min = 1, max = 5,
+                  value = 3, step = 0.1,
+                  animate =animationOptions(interval = 300, loop=TRUE))              
+         ),
+  column(width=6,
+  # slider ----
+  sliderInput("ISV", "Sludge volume index ISV [mL/kg]:",
+                  min = 50, max = 200,
+                  value = 100, step = 5,
+                  animate =animationOptions(interval = 300, loop=TRUE))         
+         )
+  ),linebreaks(1)
+
+
+)
+```
+
+```{r image_simple1}
+plotOutput("wwtp_simple1")
+```
+
+```{r annotate_wwtp_complete}
+#| context: server
+#
+# zur Erklaerung was #|context:server bedeutet
+# siehe https://quarto.org/docs/interactive/shiny/execution.html
+
+output$wwtp_complete <- renderPlot({
+  # plot ohne Inhalt aber mit bekannten Koordinaten
+  par(mar=c(0,0,0,0))
+  plot(NA, type="n", xlim=c(0,10), ylim=c(0,10), axes=FALSE, xlab="", ylab="")
+  # die usr-Koordinaten sind die echten Koordinaten, inklusive Reserve, die
+  # R automatisch hinzufuegt
+  lim <- par("usr")
+
+  # image auf volle Groesse des Plots als Hintergrundbild setzen
+  rasterImageAdj(image_complete, xleft=lim[1], ybottom=lim[3], xright=lim[2], ytop=lim[4])
+
+  # jetzt kann man beliebige Sachen irgendwo hinschreiben,
+  # und zwar mit normalem R ohne html-Tricks
+  box(lwd=1)
+})
+```
+
+```{r annotate_wwtp_simple1}
+#| context: server
+
+ode_result <- reactive({
+
+# get parameters from sliders, some are fixed  
+params <- c(Q = input$Q, R=input$RV, V_BB=1000, A_NKB=150, DSVI=input$ISV )
+
+# initial state
+X_BB0 <- input$XBB # get it from slider
+
+Ms_NKB0 <- unname((9e-7)*(input$XBB*input$ISV)^3.319)
+state_0 <- c(X_BB=X_BB0, Ms_NKB = Ms_NKB0) # empirical estimation of start mass in SC
+
+# function for dynamic inflow rate with constant values for steady state solution
+fQ <- 1
+influentdata <- data.frame(time = c(0, 2, 3, 100) ,
+                           value = c(params["Q"], fQ*params["Q"], params["Q"], params["Q"]))
+influentfun <- approxfun(influentdata, method="constant")
+
+# solving ode system
+out <- ode(y = state_0, times = t_points, func = sludge_ode, parms = params, influentfcn=influentfun)
+
+})
+
+
+output$wwtp_simple1 <- renderPlot({
+
+  # Ergebnisse holen
+  out <- ode_result()
+  X_BBend <- out[nrow(out),2]
+  X_Rend <- out[nrow(out),5]
+  hsend <- out[nrow(out),6]
+  Q_Rend <- input$Q*input$RV
+  
+  # plot ohne Inhalt aber mit bekannten Koordinaten
+  par(mar=c(0,0,0,0))
+  plot(NA, type="n", xlim=c(0,10), ylim=c(0,10), axes=FALSE, xlab="", ylab="")
+  # die usr-Koordinaten sind die echten Koordinaten, inklusive Reserve, die
+  # R automatisch hinzufuegt
+  lim <- par("usr")   
+  xmin <- par("usr")[1]   
+  xmax <- par("usr")[2]   
+  ymin <- par("usr")[3]   
+  ymax <- par("usr")[4]
+  
+  # image auf volle Groesse des Plots als Hintergrundbild setzen
+  rasterImageAdj(image_simple1, xleft=lim[1], ybottom=lim[3], xright=lim[2], ytop=lim[4])
+
+  # jetzt kann man beliebige Sachen irgendwo hinschreiben,
+  # und zwar mit normalem R ohne html-Tricks
+  box(lwd=1)
+  text(5.6, 1.1, paste(round(Q_Rend,digits=0),"m³/d"), cex=2, col="dodgerblue4", font=4)
+  text(5.6, 2.1, paste(round(X_Rend,digits=2),"g/L"), cex=2, col="dodgerblue4", font=4)
+  text(2.75,6, paste(round(X_BBend, digits=2),"g/L"), cex=2, col="dodgerblue4", font=4)
+  text(6.5,6, paste(round(hsend, digits=2),"m"), cex=2, col="dodgerblue4", font=4)
+
+})
+```
+
+<br>
+
+Note: Due to the calculation algorithm, the system of equations to be solved initially undergoes a steady state process. During this process, the sludge mass in the secondary clarifier and the dry matter content in the aeration tank are balanced against each other. As a result, the results displayed in the image may show slight deviations from the dry matter content in the aeration tank TS~AS~, which was set as a parameter. This is purely for numerical reasons and is negligible.

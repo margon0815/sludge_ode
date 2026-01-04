@@ -1,0 +1,282 @@
+---
+server: shiny
+title: "Dynamic sludge inventory of a WWTP"
+author: "Markus Ahnert, markus.ahnert@tu-dresden.de"
+---
+
+```{r setup, include=FALSE}
+library("shiny")
+library("knitr")
+library("jpeg")
+library("deSolve")
+library("Ecfun")
+
+linebreaks <- function(n){HTML(strrep(br(), n))}
+
+# conceptual model for dynamic system of activated sludge reactor and secondary 
+# clarifier with variable sludge height based on Krebs et al., 2000
+
+# Markus Ahnert, Dresden University of Technology, Institute for Urban Water Management
+# markus.ahnert@tu-dresden.de
+
+# Bild nur am Anfang einlesen, spart Rechenzeit
+#image_complete <- readJPEG("www/as_sc_scheme_complete.jpg") 
+image_simple1 <- readJPEG("www/scheme_as_sc_simple1_en.jpg")
+image_simple1_normal <- readJPEG("www/scheme_as_sc_simple1_en.jpg") 
+
+t_start <- 0 # start time
+t_end <- 5 # end time
+t_points <- seq(t_start, t_end, by = 0.01) # time points for solution
+
+# ode function
+source("func_sludge_ode.R")
+
+# general preferences for the plot
+std_ftsize <- 1.5 # standard font size
+std_lwd <- 2 # standard line width
+
+
+
+```
+
+
+The source code for the application can also be downloaded from this [link](https://github.com/margon0815/sludge_ode). An explanation of the underlying model can be found in [this document](https://github.com/margon0815/sludge_ode/blob/main/descr_model_secondary_clarifier_for_educational_purposes.pdf).
+
+### Introduction
+
+The following explanations are based on the [static sludge balance in a wastewater treatment plant](https://swwdigit.de/bb_nkb1_en/). While in this model the equilibrium state could be considered by selecting various boundary conditions, the statement of the model in the present application is extended to include the influence of the essential dynamic boundary condition — the inflow volume in the alternation between dry weather and precipitation events.
+
+
+### Explanations
+The same simplifications are assumed with regard to the mutual cancellation of
+
+-  solids in the inflow,
+-  biomass growth in the aeration tank,
+-  removal of excess sludge, and
+-  solids in the effluent in the treated wastewater
+
+as in the static model approach. This results in the material flows shown in the following figure.
+  
+
+```{r image_complete}
+plotOutput("wwtp_complete")
+```
+  
+  
+In addition, a dynamic increase in inflow is now introduced, as occurs, for example, during a precipitation event when a large amount of water suddenly flows in. The inflow quantity Q can be increased by a factor fQ. This is idealized for 24 hours between days 2 and 3 of the 5-day simulation period. The increase in inflow causes sludge to be transferred from the aeration tank to the secondary clarifier, the extent of which varies depending on the parameters set and operating conditions. After returning to the initial inflow volume, it takes some time, depending on the settings, for the values to return to a static state.
+This sludge displacement is particularly interesting for nitrification processes. In the event of precipitation, a relatively large nitrogen load is transferred from the sewer network to the wastewater treatment plant at the beginning of the event. The simultaneous displacement of sludge and the biomass it contains can lead to a situation in which there is a sudden increase in the effluent concentration of ammonium, thus creating the risk of exceeding the monitoring value. Therefore, sludge transfer in the wastewater treatment plant must be kept to a minimum, although it is hardly possible to influence this directly through the operation of the wastewater treatment plant.
+At the same time, when designing the overall system consisting of the sewer network and sewage treatment plant, the aim is to treat as much of the rainwater as possible in the sewage treatment plant in order to minimize water pollution from combined sewer overflows.
+  
+  
+  
+### Sample calculations
+
+In the following example, a volume of 1000 m³ is again used in the calculation for the aeration tank, and a surface area of 150 m² for the secondary clarifier. In addition to the operating settings from the calculation of the [static sludge balance in a wastewater treatment plant](https://swwdigit.de/bb_nkb1/), the inflow quantity Q can be increased by the factor fQ. This factor is usually in the range of 2-4 for wastewater treatment plants connected to a sewer network in a combined sewer system. The larger the factor selected, the greater the impact of the dynamic change on the sludge balance of the wastewater treatment plant.
+  
+  
+### Tasks
+
+1. How does the sludge level in the secondary clarifier change qualitatively when the individual parameters are changed?
+2. Which parameter has the greatest influence on the sludge level?
+3. What proportion of activated sludge is in equilibrium before the inflow increases or after the return to dry weather inflow in the aeration tank, and what proportion is in the sludge bed of the secondary clarifier? How do these proportions change during the precipitation event?
+4. What influence does an increase in the ISV have on the distribution of the sludge masses?
+5. With the preset parameters, how long does it take approximately for a new equilibrium to be established after an increase in inflow?
+6. How does this settling time change when the ISV increases? How can this be explained?
+
+  
+  
+  
+```{r}
+
+fluidPage(
+fluidRow(style='border-left: 1px solid black;
+                border-right: 1px solid black;
+                border-top: 1px solid black',
+  column(width=6,
+  # slider ----
+  sliderInput("Q", "INfluent flow rate Q [m³/d]:",
+                  min = 1000, max = 20000,
+                  value = 1000, step = 100)),
+  column(width=6,
+  # slider ----
+  sliderInput("fQ", "flow rate increase fQ [-]:",
+                  min = 1, max = 6,
+                  value = 2, step = 0.5))
+  ),
+fluidRow(style='border-left: 1px solid black;
+                border-right: 1px solid black',
+  column(width=6,
+  # slider ----
+  sliderInput("RV", "Return flow ratio RV [-]:",
+                  min = 0.5, max = 1,
+                  value = 1, step = 0.05)),
+  column(width=6,
+  # slider ----
+  sliderInput("XBB", HTML("Solids conc. AS TS<sub>AS</sub> [g/L]:"),
+                  min = 2, max = 5,
+                  value = 3, step = 0.1))
+  ),
+fluidRow(style='border-left: 1px solid black;
+                border-right: 1px solid black;
+                border-bottom: 1px solid black',
+  column(width=6,
+  # slider ----
+  sliderInput("ISV", "Sludge volume index ISV [mL/kg]:",
+                  min = 50, max = 200,
+                  value = 100, step = 5))
+  ),linebreaks(1)
+)
+
+```
+
+```{r image_simple1}
+plotOutput("wwtp_simple1")
+```
+
+```{r annotate_wwtp_complete}
+#| context: server
+#
+# zur Erklaerung was #|context:server bedeutet
+# siehe https://quarto.org/docs/interactive/shiny/execution.html
+
+output$wwtp_complete <- renderPlot({
+  # plot ohne Inhalt aber mit bekannten Koordinaten
+  par(mar=c(0,0,0,0))
+  plot(NA, type="n", xlim=c(0,10), ylim=c(0,10), axes=FALSE, xlab="", ylab="")
+  # die usr-Koordinaten sind die echten Koordinaten, inklusive Reserve, die
+  # R automatisch hinzufuegt
+  lim <- par("usr")
+
+  # image auf volle Groesse des Plots als Hintergrundbild setzen
+  rasterImageAdj(image_simple1_normal, xleft=lim[1], ybottom=lim[3], xright=lim[2], ytop=lim[4])
+
+  # jetzt kann man beliebige Sachen irgendwo hinschreiben,
+  # und zwar mit normalem R ohne html-Tricks
+  box(lwd=1)
+})
+```
+
+```{r annotate_wwtp_simple1}
+#| context: server
+
+ode_result <- reactive({
+
+# get parameters from sliders, some are fixed  
+params <- c(Q = input$Q, R=input$RV, V_BB=1000, A_NKB=150, DSVI=input$ISV )
+
+# initial state
+X_BB0 <- input$XBB # get it from slider
+
+Ms_NKB0 <- unname((9e-7)*(input$XBB*input$ISV)^3.319)
+state_0 <- c(X_BB=X_BB0, Ms_NKB = Ms_NKB0) # empirical estimation of start mass in SC
+
+# function for dynamic inflow rate with constant values for steady state solution
+fQ <- 1
+influentdata <- data.frame(time = c(0, 2, 3, 100) ,
+                           value = c(params["Q"], fQ*params["Q"], params["Q"], params["Q"]))
+influentfun <- approxfun(influentdata, method="constant")
+
+# solving ode system for steady state solution
+out <- ode(y = state_0, times = t_points, func = sludge_ode, parms = params, influentfcn=influentfun)
+
+# function for dynamic inflow rate with constant values for dynamic solution
+fQ <- input$fQ
+influentdata <- data.frame(time = c(0, 2, 3, 100) ,
+                           value = c(params["Q"], fQ*params["Q"], params["Q"], params["Q"]))
+influentfun <- approxfun(influentdata, method="constant")
+
+# definition of new state
+X_BB0 <- unname(out[nrow(out), 2])
+Ms_NKB0 <- unname(out[nrow(out), 3])
+
+state_0 <- c(X_BB=X_BB0, Ms_NKB = Ms_NKB0) 
+
+# solving ode system for dynamic solution
+out <- ode(y = state_0, times = t_points, func = sludge_ode, parms = params, influentfcn=influentfun)
+
+})
+
+output$wwtp_simple1 <- renderPlot({
+
+  # Ergebnisse holen
+  out <- ode_result()
+  
+  time <- out[,1]
+  X_BB <- out[,2] 
+  X_R <- out[,5]
+  hs <- out[,6]
+  MsBB <- out[,4]
+  MsNKB <- out[,3]
+  Qin <- out[,7]
+  QX_BB <- Qin*(1+input$RV)*X_BB
+  QX_R <- Qin*input$RV*X_R
+
+ par(mfrow = c(2, 2),mar = c(4,4,2,2)+0.1)    
+
+# plot sludge height
+plot(x=time,y=hs,type="l",lwd=std_lwd,
+     xlab = NA, ylab = "Height [m]", main = "Sludge level in SC",
+     cex.main=std_ftsize,cex.sub=std_ftsize,cex.lab=std_ftsize,cex.axis=std_ftsize) 
+
+# plot mass flux
+plot(time, MsBB, type = "n", xlim = c(0, 5), ylim = c(min(QX_BB,QX_R), max(QX_BB,QX_R)),
+     xlab = NA, ylab = "Solid mass flow [kg/h]", main = "Solid mass flows",
+     cex.main=std_ftsize,cex.sub=std_ftsize,cex.lab=std_ftsize,cex.axis=std_ftsize) 
+
+# Plot each line one by one
+lines(time, QX_BB, type = "l", col = "black",lwd=std_lwd)
+lines(time, QX_R, type = "l", col = "dodgerblue4",lty=2,lwd=std_lwd)
+# Add a legend
+legend("right", legend = c("to SC", "to AS"), 
+       col = c("black", "dodgerblue4"), lty = c(1,2), inset=0.01,cex=std_ftsize,lwd=std_lwd)
+
+  
+# plot solids conc
+plot(time, X_BB, type = "l", xlim = c(0, 5), ylim = c(min(X_BB), max(X_BB)), 
+     col = "black",lwd=std_lwd,
+     xlab = "time [d]", ylab = "Solids conc. [g/L]", main = "Solids concentrations",
+     cex.main=std_ftsize,cex.sub=std_ftsize,cex.lab=std_ftsize,cex.axis=std_ftsize) 
+
+# set parameter new=True for a new axis 
+par(new = TRUE)
+
+plot(time, X_R, type = "l", xlim = c(0, 5), ylim = c(min(X_R), max(X_R)), 
+     col = "dodgerblue4",lty=2,lwd=std_lwd, axes = FALSE,
+     xlab = "", ylab = "",
+     cex.main=std_ftsize,cex.sub=std_ftsize,cex.lab=std_ftsize,cex.axis=std_ftsize) 
+
+axis(side = 4, at = pretty(range(X_R)),cex.axis=std_ftsize,
+     col = 'dodgerblue4', col.axis = 'dodgerblue4', col.ticks = 'dodgerblue4')       
+
+# Add a legend
+legend("bottomright", legend = c("AS", "RLS"), 
+       col = c("black", "dodgerblue4"), lty = c(1,2), inset=c(0.01,0.01),cex=std_ftsize,lwd=std_lwd)
+
+
+# plot mass content
+plot(time, MsBB, type = "l", xlim = c(0, 5), ylim = c(min(MsBB,MsBB), max(MsBB,MsBB)),
+     xlab = "time [d]", ylab = "solids mass [kg]", main = "Stored masses",
+     cex.main=std_ftsize,cex.sub=std_ftsize,cex.lab=std_ftsize,cex.axis=std_ftsize,
+     col = "black",lwd=std_lwd) 
+
+# set parameter new=True for a new axis 
+par(new = TRUE)
+
+plot(time, MsNKB, type = "l", xlim = c(0, 5), ylim = c(min(MsNKB), max(MsNKB)), 
+     col = "dodgerblue4",lty=2,lwd=std_lwd, axes = FALSE,
+     xlab = "", ylab = "",
+     cex.main=std_ftsize,cex.sub=std_ftsize,cex.lab=std_ftsize,cex.axis=std_ftsize) 
+
+axis(side = 4, at = pretty(range(MsNKB)),cex.axis=std_ftsize,
+     col = 'dodgerblue4', col.axis = 'dodgerblue4', col.ticks = 'dodgerblue4')       
+
+# Add a legend
+legend("right", legend = c("AS", "SC"), 
+       col = c("black", "dodgerblue4"), lty = c(1,2), inset=0.01,cex=std_ftsize,lwd=std_lwd)
+
+box(col = "black",which = "outer",lwd=1)
+
+})
+```
+  
+  
