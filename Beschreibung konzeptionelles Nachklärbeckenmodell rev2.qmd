@@ -14,10 +14,7 @@ Nachklärbecken (NKB) als letzte verfahrenstechnische Stufe einer Kläranlage ha
 2. Aufkonzentrieren des Rücklaufschlammes für die Rückfühung in das Belebungsbecken (BB)
 
 Dabei wirkt das Schlammbett im Nachklärbecken als Speicher für einen Teil des Belebtschlamms. Je mehr Schlamm im NKB gespeichert ist, umso weniger steht im BB für die Reinigungsprozesse zur Verfügung. aher ist die Kenntnis über die Prozesse und deren Dynamik, die sich im System BB - NKB einstellt, von wesentlicher Bedeutung.
-Die folgende Modellbeschreibung wurde basierend auf den Arbeiten von [@krebs2000] und [@holzer1998] für eine Verwendung mit der Programmiersprache [R](https://www.R-project.org/) adaptiert (siehe auch [@RManual]). In der Arbeit von [@hupfer2001] erfolgte ein Praxistest des beschriebenen Modells im Vergleich zu anderen Nachklärbeckenmodellen mit realen Messdaten. Die generelle Eignung wurde dabei nachgewiesen. Eine Anwendung zur Nachbildung realer Prozesse erscheint aber zweitrangig. Aufgrund der Einfachheit des nachfolgend beschriebenen Modellansatzes ist er sehr gut geeignet, sowohl die Prozessdynamik als auch die Technik der Modellierung für Ausbildungszwecke zu demonstrieren.
-  
-![Systemdefinition](systemdefinition.png){#fig-system}
-       
+Die folgende Modellbeschreibung wurde basierend auf den Arbeiten von [@krebs2000] und [@holzer1998] für eine Verwendung mit der Programmiersprache [R](https://www.R-project.org/) adaptiert (siehe auch [@RManual]). In der Arbeit von [@hupfer2001] erfolgte ein Praxistest des beschriebenen Modells im Vergleich zu anderen Nachklärbeckenmodellen mit realen Messdaten. Die generelle Eignung wurde dabei nachgewiesen. Eine Anwendung zur Nachbildung realer Prozesse erscheint aber zweitrangig. Aufgrund der Einfachheit des nachfolgend beschriebenen Modellansatzes ist er sehr gut geeignet, sowohl die Prozessdynamik als auch die Technik der Modellierung für Ausbildungszwecke zu demonstrieren.  
 Das betrachtete Gesamtsystem ist in [@fig-system] dargestellt. Es besteht aus dem gekoppelten System Belebungsbecken - Nachklärbecken. Für das nachfolgend beschrieben Modell wird zur Vereinfachung angenommen, dass die folgenden Stoffströme im Gleichgewicht stehen und sich somit gegenseitig aufheben:
 
 -   Feststoffe im Zulauf
@@ -25,6 +22,10 @@ Das betrachtete Gesamtsystem ist in [@fig-system] dargestellt. Es besteht aus de
 -   Abzug von Überschussschlamm
 -   Feststoffe im Ablauf im gereinigten Abwasser
   
+  
+  
+![Systemdefinition](systemdefinition.png){#fig-system}
+     
 Für die Eindickung im Schlammbett des Nachklärbeckens wird angenommen, dass dies annähernd einer linearen Konzentrationszunahme über die Schlammbetttiefe entspricht (siehe [@fig-konzept]).  
 
 ![Feststoffgehalt über die Schlammbetttiefe](konzept_schlammspiegel.png){#fig-konzept}

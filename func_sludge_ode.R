@@ -1,3 +1,9 @@
+# conceptual model for dynamic system of activated sludge reactor and secondary 
+# clarifier with variable sludge height based on Krebs et al., 2000
+
+# Markus Ahnert, Dresden University of Technology, Institute for Urban Water Management
+# markus.ahnert@tu-dresden.de
+
 # define ODE function - in that special case a differential algebraic system
 sludge_ode <- function(t, state, params,influentfcn) {
   with(as.list(c(state, params)), {

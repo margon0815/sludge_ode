@@ -31,27 +31,26 @@ source("func_sludge_ode.R")
 
 ```
 
-
 Markus Ahnert, Technische Universität Dresden, Institut für Siedlungs- und Industriewasserwirtschaft\
 [markus.ahnert\@tu-dresden.de](mailto:markus.ahnert@tu-dresden.de)
-  
-Der Source-Code der Anwendung kann unter diesem [Link](https://github.com/margon0815/sludge_ode) auch heruntergeladen werden. Eine Erläuterung des zugrundeliegenden Modells findet sich in [diesem Dokument](https://github.com/margon0815/sludge_ode/blob/main/Beschreibung-konzeptionelles-Nachkl%C3%A4rbeckenmodell-rev2.pdf). 
-  
+
+Der Source-Code der Anwendung kann unter diesem [Link](https://github.com/margon0815/sludge_ode) auch heruntergeladen werden. Eine Erläuterung des zugrundeliegenden Modells findet sich in [diesem Dokument](https://github.com/margon0815/sludge_ode/blob/main/Beschreibung-konzeptionelles-Nachkl%C3%A4rbeckenmodell-rev2.pdf).
 
 ### Einführende Erläuterungen
-*Allgemeines*  
-Eine Kläranlage besteht aus mehreren Reinigungsstufen. Nach der mechanischen  schließt sich die biologische Reinigungsstufe an, meist in Form des [Belebtschlammverfahrens](https://de.wikipedia.org/wiki/Belebtschlammverfahren). Dies ist das am häufigsten eingesetzte Verfahren bei der biologischen Abwasserbehandlung von kommunalem Abwasser. Grundlage des Verfahrens sind Bakterien, die für ihr Wachstum Abwasserinhaltsstoffe nutzen und so zu einem Abbau dieser Stoffe beitragen. Zur Sicherstellung einer ausreichenden Generationszeit muss die Biomasse, also die Summe aller beteiligten Mikroorganismen (Bakterien, Ein- und Mehrzeller), in einer Kläranlage angereichert werden. 
 
-*Verfahrenstechnische Umsetzung auf Kläranlagen*  
-Zu diesem Zweck sind bei Kläranlagen Belebungs- und Nachklärbecken vorhanden.  
-Im Belebungsbecken erfolgt die biologische Umsatzreaktion, im Nachklärbecken die Abtrennung von gereinigtem Abwasser und belebtem Schlamm. Letzerer wird über den Rücklaufschlamm wieder zurück in das Belebungsbecken geführt. Ein Teil des Belebtschlamms wird als Überschussschlamm aus der Kläranlage abgezogen und in der Schlammbehandlung weiter aufbereitet. Im Belebungsbecken entsteht durch den biologischen Abbau neuer Belebschlamm.  
+*Allgemeines*\
+Eine Kläranlage besteht aus mehreren Reinigungsstufen. Nach der mechanischen schließt sich die biologische Reinigungsstufe an, meist in Form des [Belebtschlammverfahrens](https://de.wikipedia.org/wiki/Belebtschlammverfahren). Dies ist das am häufigsten eingesetzte Verfahren bei der biologischen Abwasserbehandlung von kommunalem Abwasser. Grundlage des Verfahrens sind Bakterien, die für ihr Wachstum Abwasserinhaltsstoffe nutzen und so zu einem Abbau dieser Stoffe beitragen. Zur Sicherstellung einer ausreichenden Generationszeit muss die Biomasse, also die Summe aller beteiligten Mikroorganismen (Bakterien, Ein- und Mehrzeller), in einer Kläranlage angereichert werden.
 
-*Interne und externe Einflüsse auf den Schlammhaushalt*  
+*Verfahrenstechnische Umsetzung auf Kläranlagen*\
+Zu diesem Zweck sind bei Kläranlagen Belebungs- und Nachklärbecken vorhanden.\
+Im Belebungsbecken erfolgt die biologische Umsatzreaktion, im Nachklärbecken die Abtrennung von gereinigtem Abwasser und belebtem Schlamm. Letzerer wird über den Rücklaufschlamm wieder zurück in das Belebungsbecken geführt. Ein Teil des Belebtschlamms wird als Überschussschlamm aus der Kläranlage abgezogen und in der Schlammbehandlung weiter aufbereitet. Im Belebungsbecken entsteht durch den biologischen Abbau neuer Belebschlamm.
+
+*Interne und externe Einflüsse auf den Schlammhaushalt*\
 Verschiedene Faktoren haben einen direkten Einfluss auf den Schlammhaushalt in einer Kläranlage:
 
-- zeitliche Schwankungen aus dem Kläranlagenzulauf, 
-- Betriebseinstellungen innerhalb der Kläranlage sowie
-- schwankende Absetzeigenschaften des Belebtschlamms 
+-   zeitliche Schwankungen aus dem Kläranlagenzulauf,
+-   Betriebseinstellungen innerhalb der Kläranlage sowie
+-   schwankende Absetzeigenschaften des Belebtschlamms
 
 Durch das Zusammenwirken und die zeitliche Änderung können sich unterschiedliche Gleichgewichte im Schlammhaushalt zwischen Belebungs- und Nachklärbecken einstellen. Beim Betrieb der Kläranlage ist darauf zu achten, dass keine ungünstigen Zustände eintreten, die die Reinigungsleistung der Kläranlage gefährden könnten. Ziel sollte immer sein, soviel Belebtschlamm wie möglich im Belebungsbecken zu halten.
 
@@ -68,37 +67,33 @@ Obige Abbildung zeigt die wesentlichen Stoffströme vom Zulauf des Belebungsbeck
 -   Abzug von Überschussschlamm
 -   Feststoffe im Ablauf im gereinigten Abwasser
 
-Für das nachfolgend genutzte Berechnungsmodell wurde zur Vereinfachung angenommen, dass sich im Gleichgewichtszustand alle diese Stoffströme im Gleichgewicht stehen und sich somit gegenseitig aufheben. Daher wird durch die Einstellungen nur noch die Aufteilung des Schlammes zwischen Belebungs- und Nachklärbecken beeinflusst sowie die Eindickfähigkeit und der daraus resultierende Schlammspiegel in der Nachklärung.
-Die nachfolgene Berechnung ergibt den statischen Zustand des Systems. In einer weiterführenden Version kann auch die [dynamische Reaktion des Schlammhaushaltes](https://swwdigit.de/bb_nkb2/) betrachtet werden.
-  
-  
+Für das nachfolgend genutzte Berechnungsmodell wurde zur Vereinfachung angenommen, dass sich im Gleichgewichtszustand alle diese Stoffströme im Gleichgewicht stehen und sich somit gegenseitig aufheben. Daher wird durch die Einstellungen nur noch die Aufteilung des Schlammes zwischen Belebungs- und Nachklärbecken beeinflusst sowie die Eindickfähigkeit und der daraus resultierende Schlammspiegel in der Nachklärung. Die nachfolgene Berechnung ergibt den statischen Zustand des Systems. In einer weiterführenden Version kann auch die [dynamische Reaktion des Schlammhaushaltes](https://swwdigit.de/bb_nkb2/) betrachtet werden.
+
 ### Beispielberechnungen
 
-*Szenarienbeschreibung*
-Das nachfolgende Beispiel bezieht sich auf den Schlammkreislauf zwischen Belebungs- und Nachklärbecken. Für das Belebungsbecken wurde dabei ein Volumen von 1000 m³ in der Berechnung angesetzt, für das Nachklärbecken eine Oberfläche von 150 m². Die Konzentration des Rücklaufschlamms ist dabei abhängig von der Eindickung des Schlammes im Nachklärbecken. Je länger die Aufenthaltszeit des Schlammes im Nachklärbecken ist, umso stärker wird dieser aufkonzentriert. Folgende Betriebseinstellungen und Schlammeigenschaften können dabei über die Slider verändert werden:
+*Szenarienbeschreibung* Das nachfolgende Beispiel bezieht sich auf den Schlammkreislauf zwischen Belebungs- und Nachklärbecken. Für das Belebungsbecken wurde dabei ein Volumen von 1000 m³ in der Berechnung angesetzt, für das Nachklärbecken eine Oberfläche von 150 m². Die Konzentration des Rücklaufschlamms ist dabei abhängig von der Eindickung des Schlammes im Nachklärbecken. Je länger die Aufenthaltszeit des Schlammes im Nachklärbecken ist, umso stärker wird dieser aufkonzentriert. Folgende Betriebseinstellungen und Schlammeigenschaften können dabei über die Slider verändert werden:
 
-*Zulaufmenge Q*  
+*Zulaufmenge Q*\
 Je größer die Zulaufmenge ist, umso mehr Schlamm wird in das Nachklärbecken verlagert. Gleichzeitig beeinflusst dies die Aufenthaltszeit des Schlammes im Nachklärbecken.
 
-*Rücklaufverhältnis RV* 
-Das Rücklaufverhältnis berechnet sich wie folgt: RV = Q~RLS~/Q und gibt an, welcher Anteil der Zulaufmenge sich im Schlammkreislauf befindet. Auch diese Größe beeinflusst die Aufenthaltszeit des Schlammes im Nachklärbecken. Das Rücklaufverhältnis wird im Rahmen der Bemessung der Anlage festgelegt und liegt zwischen 0,75 und 1,0.
+*Rücklaufverhältnis RV* Das Rücklaufverhältnis berechnet sich wie folgt: RV = Q~RLS~/Q und gibt an, welcher Anteil der Zulaufmenge sich im Schlammkreislauf befindet. Auch diese Größe beeinflusst die Aufenthaltszeit des Schlammes im Nachklärbecken. Das Rücklaufverhältnis wird im Rahmen der Bemessung der Anlage festgelegt und liegt zwischen 0,75 und 1,0.
 
-*Feststoffgehalt im Belebungsbecken TS~BB~*  
+*Feststoffgehalt im Belebungsbecken TS~BB~*\
 Der Feststoffgehalt im Belebungsbecken ergibt sich aus den Feststoffen im Zulauf, der Schlammproduktion und dem eingestellten Schlammalter (über den Überschussschlammabzug). Bei sehr hohen Feststoffgehalten und ungünstigen Schlammeigenschaften (siehe ISV) kann die Leistungsfähigkeit des Nachklärbeckens überschritten werden. Der Schlammspiegel steigt dann soweit an, dass ein Abtrieb von Belebschlamm in den Ablauf und damit in das Gewässer erfolgt.
 
-*Schlammvolumenindex ISV*  
+*Schlammvolumenindex ISV*\
 Der Schlammvolumenindex beschreibt die Eindickfähigkeit des Schlammes. Je kleiner dieser Wert liegt, umso besser. Übliche Größenordnungen für gut absetzbaren Schlamm sind 80 - 120 mL/g. Ab 150 mL/g handelt es sich um einen schlecht absetzbaren Schlamm.
 
 ### Aufgaben
 
-1. Verschaffen sie sich einen Eindruck über die Wirkung und die gegenseitigen Abhängigkeiten der einzelnen Einstellparameter:
+1.  Verschaffen sie sich einen Eindruck über die Wirkung und die gegenseitigen Abhängigkeiten der einzelnen Einstellparameter:
 
-* Welchen Einfluss hat die Zulaufmenge Q auf die Schlammspiegelhöhe h~s~? Wie ist das erklärbar?
-* Wie verändert sich die Rücklaufschlammmenge Q~RLS~ bei Verringerung des Rücklaufverhältnisses RV? Ändert sich dabei auch der Feststoffgehalt im Rücklaufschlamm TS~RLS~? Wenn ja, woran liegt das?
-* Auf welche Größen wirkt sich eine Änderung des Schlammvolumenindex ISV aus?
+-   Welchen Einfluss hat die Zulaufmenge Q auf die Schlammspiegelhöhe h~s~? Wie ist das erklärbar?
+-   Wie verändert sich die Rücklaufschlammmenge Q~RLS~ bei Verringerung des Rücklaufverhältnisses RV? Ändert sich dabei auch der Feststoffgehalt im Rücklaufschlamm TS~RLS~? Wenn ja, woran liegt das?
+-   Auf welche Größen wirkt sich eine Änderung des Schlammvolumenindex ISV aus?
 
-2. Das Nachklärbecken weist eine Tiefe von 4 m auf. Finden sie Einstellungen für TS~BB~ und ISV, die zu einem wahrscheinlichen Schlammabtrieb führen können.
-3. Welcher minimale Schlammspiegel stellt sich bei folgenden Einstellparametern ein: Q = 1000 m³/d / RV = 0,75 / TS~BB~ = 3,5 g/L (wie ist in diesem Fall der Parameter ISV zu wählen?)
+2.  Das Nachklärbecken weist eine Tiefe von 4 m auf. Finden sie Einstellungen für TS~BB~ und ISV, die zu einem wahrscheinlichen Schlammabtrieb führen können.
+3.  Welcher minimale Schlammspiegel stellt sich bei folgenden Einstellparametern ein: Q = 1000 m³/d / RV = 0,75 / TS~BB~ = 3,5 g/L (wie ist in diesem Fall der Parameter ISV zu wählen?)
 
 <br>
 
@@ -145,10 +140,6 @@ fluidRow(style='border-left: 1px solid black;
 
 )
 ```
-
-   
-   
-   
 
 ```{r image_simple1}
 plotOutput("wwtp_simple1")

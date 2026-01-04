@@ -1,0 +1,166 @@
+---
+title: "Development and application of a conceptual secondary clarifier model for educational purposes"
+author: "Markus Ahnert, Technische Universität Dresden"
+email: "markus.ahnert@tu-dresden.de"
+format: pdf
+bibliography: quellen.bib
+csl: uni_bremen_deutsch2.csl # https://editor.citationstyles.org/visualEditor/
+---
+## Theoretical background
+
+Secondary clarifiers (SCs) are the final stage of wastewater treatment plants and have two main functions.
+
+1. Separating activated sludge from treated wastewater
+2. Concentrating return sludge for recirculation to the aeration tank (AS)
+
+The sludge bed in the secondary clarifier acts as a storage reservoir for part of the activated sludge. The more sludge stored in the SC, the less is available in the AS for the treatment processes. Therefore, knowledge of the processes and their dynamics in the AS-SC system is essential.
+The following model description was adapted based on the work of [@krebs2000] and [@holzer1998] for use with the programming language [R](https://www.R-project.org/) (see also [@RManual]). In the work of [@hupfer2001], a practical test of the described model was carried out in comparison with other secondary clarifier models using real measurement data. Its general suitability was proven. However, an application for simulating real processes appears to be of secondary importance. Due to the simplicity of the model approach described below, it is very well suited for demonstrating both the process dynamics and the modeling technique for educational purposes.  
+The overall system under consideration is shown in [@fig-system]. It consists of the coupled system of aeration tank and secondary clarifier. For the sake of simplicity, the model described below assumes that the following material flows are in equilibrium and thus cancel each other out:
+
+- Solids in the influent
+- Biomass growth in the aeration tank
+- Removal of excess sludge
+- Solids in the effluent in the treated wastewater
+  
+  
+  
+![System definition](systemdefinition_en.png){#fig-system}
+     
+For thickening in the sludge bed of the secondary clarifier, it is assumed that this corresponds approximately to a linear increase in concentration across the sludge bed depth (see [@fig-konzept]).  
+
+![Total solids concentration in sludge bed](concept_sludge_level_en.png){#fig-konzept}
+  
+  
+## Derivation of equations
+
+In the simplest case, the SC can be defined as a system with a sludge bed and a clear water supernatant. The sludge in the SC concentrates with increasing depth in the sludge bed. The solid concentration X~B~ that can be achieved at the bottom of the basin can be calculated according to [@eq-1] ([@A131_2016] Eq. 40):
+
+$$
+X_B = \frac{1000}{DSVI} \cdot \sqrt[3]{24 \cdot t_E} = \frac{1000 \cdot \sqrt[3]{24}}{DSVI} \cdot \sqrt[3]{t_E}
+$${#eq-1}
+
+with t~E~ thickening time [d] and DSVI diluted sludge volume index [mL/kg].  
+The solids concentration in the return sludge X~R~ is calculated from this, reduced by the influence of short-circuit flows (see [@A131_2016] S. 41):
+
+$$
+X_R = 0.7 \cdot X_B \text{ , } X_B = \frac{X_R}{0.7}
+$${#eq-2}
+
+Thickening time t~E~ is assumed as mean residence time in sludge bed of SC:
+
+$$
+t_E = \frac{\textit{sludge mass in SC}}{\textit{sludge mass back from SC to AS}} = \frac{M_{S,SC}}{Q \cdot R \cdot X_R} = \frac{M_{S,SC}}{0.7 \cdot Q \cdot R \cdot X_B}
+$${#eq-3}
+
+with Q influent flow [m³/d]   
+and R return sludge flow from SC to AS  ($R=\frac{Q_{RS}}{Q}$) [-].
+
+[@eq-1] can be simplified with separation of constants:
+
+
+$$
+X_B = K \cdot \sqrt[3]{t_E} \text{   with   }   K = \frac{1000 \cdot \sqrt[3]{24}}{DSVI}
+$${#eq-4}
+
+Thickening time t~E~ calculates to:
+
+$$
+t_E = X_B^3 \cdot \left(\frac{1}{K}\right)^3
+$${#eq-5}
+
+By equating [@eq-3] and [@eq-5], X~B~ can now be calculated by rearranging the equation:
+
+$$
+X_B^3 \cdot \left(\frac{1}{K}\right)^3 = \frac{M_{S,SC}}{0.7 \cdot Q \cdot R \cdot X_B}
+$${#eq-6}
+
+$$
+X_B^4 = \frac{M_{S,SC}}{\left(\frac{1}{K}\right)^3 \cdot 0.7 \cdot Q \cdot R}
+$${#eq-7}
+
+$$
+X_B = \sqrt[4]{\left(\frac{M_{S,SC}}{\left(\frac{1}{K}\right)^3 \cdot 0.7 \cdot Q \cdot R}\right)}
+$${#eq-8}
+
+Using [@eq-2], the return sludge concentration X~R~ can be derived from [@eq-8]:
+
+$$
+X_R = 0.7 \cdot \sqrt[4]{\left(\frac{M_{S,SC}}{\left(\frac{1}{K}\right)^3 \cdot 0.7 \cdot Q \cdot R}\right)}
+$${#eq-9}
+
+Now the balance equations for the changes in sludge mass in the aeration tank and secondary clarifier can be set up. For the aeration tank, this results in:
+
+$$
+V_{AS} \cdot \frac{dX_{AS}}{dt} = Q \cdot R \cdot X_R - Q \cdot (1+R) \cdot X_{AS}
+$${#eq-10}
+
+Assuming a constant aeration tank volume V~AS~, this can be transformed to:
+
+$$
+\frac{dX_{AS}}{dt} = \frac{Q}{V_{AS}} \cdot \left(R \cdot X_R - (1+R) \cdot X_{AS}\right)
+$${#eq-11}
+
+The change in sludge mass in the sludge bed of the secondary clarifier is calculated as follows:
+
+$$
+\frac{dX_{M_{S,SC}}}{dt} = Q \cdot \left(1+R \right) \cdot X_B - Q \cdot R \cdot X_R
+$${#eq-12}
+
+Finally, the sludge level height h~s~ can be calculated using the known variables:
+
+$$
+h_S = 0.7 \cdot \frac{M_{S,SC}}{0.5 \cdot A_{SC} \cdot X_R}
+$${#eq-13}
+
+This provides all the relationships needed to calculate the necessary variables.
+  
+  
+## Function for the differential equation system
+
+The technical implementation is demonstrated using the R programming language. The equation system can be encapsulated in a function:
+
+```r
+sludge_ode <- function(t, state, params,influentfcn) {
+  with(as.list(c(state, params)), {
+    
+    Q <- influentfcn(t)       # function for dynamic influent
+    K <- (1000*24^(1/3))/DSVI # constant K 
+    
+    # solids conc. of return sludge flow
+    X_R <-0.7*(Ms_SC/((1/K)^3*0.7*Q*R))^(1/4) 
+    
+    # ODEs
+    
+    # sludge conc. in activated sludge reactor 
+    # (direct calculation of conc. with constant volume of AS reactor)
+    dX_AS <- Q/V_AS*R*X_R - Q/V_AS*(1+R)*X_AS 
+    
+    # sludge mass in secondary clarifier 
+    # (variable volume of sludge bed as reactor volume)
+    dMs_SC <- Q*(1+R)*X_AS-Q*R*X_R             
+    
+    # additional calculations
+    
+    # height of sludge bed
+    hs <- 0.7*Ms_SC/(0.5*A_SC*X_R)
+    
+    # sludge mass in AS reactor
+    MsAS <- V_AS*X_AS
+    
+    # total sludge mass as control variable
+    Ms <- MsAS+Ms_SC                           
+    
+    # return derivatives and additional results
+    return(list(c(dX_AS,dMs_SC),Ms_AS=MsAS,X_R=X_R,hs=hs,Qin=Q))
+  })
+}
+```
+  
+The use of the R package deSolve is recommended for solving this system of equations ([@Soetaert2010-JSS-deSolve]). To do this, the model parameters must be defined and a starting state must be specified.  
+Example applications with this system of equations can be found in a GitHub repository: [https://github.com/margon0815/sludge_ode](https://github.com/margon0815/sludge_ode).  
+  
+
+## References
+
+::: {#refs}
+:::

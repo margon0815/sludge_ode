@@ -97,7 +97,7 @@ fluidRow(style='border-left: 1px solid black;
   column(width=6,
   # slider ----
   sliderInput("Q", "Zulaufmenge Q [m³/d]:",
-                  min = 100, max = 20000,
+                  min = 1000, max = 20000,
                   value = 1000, step = 100)),
   column(width=6,
   # slider ----
